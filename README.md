@@ -1,5 +1,4 @@
 # AIORedis wrapper package
 
-This is a simple example package. You can use
-
-to write your content.
+## Installation
+`pip install git+ssh://git@bitbucket.org/alwayswann4sleep/aioredis_wrapper.git --upgrade`
