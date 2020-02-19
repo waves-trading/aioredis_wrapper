@@ -17,7 +17,7 @@ class RedisConnection(object):
         self._redis = None
 
     async def __aenter__(self):
-        self._redis = await create_redis((self._host, self._port), password=self._password)
+        self._redis = await create_redis((self._host, self._port), password=self._password, encoding="utf-8")
         return self._redis
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
