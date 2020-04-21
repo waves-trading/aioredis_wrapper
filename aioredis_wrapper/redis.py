@@ -16,6 +16,10 @@ class RedisConnection(object):
         self._password = password
         self._redis = None
 
+    @property
+    def address(self):
+        return self._host, self._port
+
     async def __aenter__(self):
         self._redis = await create_redis((self._host, self._port), password=self._password, encoding="utf-8")
         return self._redis
