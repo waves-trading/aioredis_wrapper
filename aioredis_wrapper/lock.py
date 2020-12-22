@@ -27,7 +27,6 @@ class Lock(object):
     @duration.setter
     def duration(self, duration: int) -> None:
         self._lock_duration = duration
-        return None
 
     @property
     def redis_key(self) -> str:
@@ -36,7 +35,6 @@ class Lock(object):
     @redis_key.setter
     def redis_key(self, key: str) -> None:
         self._lock_key = key
-        return None
 
     @property
     def identifier(self) -> str:
@@ -45,7 +43,6 @@ class Lock(object):
     @identifier.setter
     def identifier(self, identifier: str) -> None:
         self._identifier = identifier
-        return None
 
     def __str__(self):
         return f"{self.redis_key}:{self.identifier}\tfor {self.duration} seconds"
