@@ -29,7 +29,7 @@ class RedisConnection(object):
 
     @property
     def address(self):
-        return self._host, self._port
+        return self._host, self._port, self._db
 
     async def __aenter__(self):
         self._redis = await create_redis(
