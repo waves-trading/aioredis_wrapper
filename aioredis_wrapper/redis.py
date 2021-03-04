@@ -17,14 +17,14 @@ class RedisConnection(object):
             port: int = 6379,
             password: Optional[str] = None,
             db: int = 0,
-            request_timeout: int = 2,
+            timeout: int = 2,
             **__
     ) -> None:
         self._host = host
         self._port = port
         self._password = password
         self._redis = None
-        self._timeout = request_timeout
+        self._timeout = timeout
         self._db = db
 
     @property
