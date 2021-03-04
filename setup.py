@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="aioredis_wrapper",
-    version="0.0.2",
+    version="1.0.0",
     author="Alex Shitik",
     author_email="salexs95@yandex.ru",
     description="Wrapper for aioredis library",
