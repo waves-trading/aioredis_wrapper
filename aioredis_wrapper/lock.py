@@ -1,4 +1,5 @@
 """"""
+import asyncio
 from typing import Optional
 from uuid import uuid4
 
@@ -57,7 +58,15 @@ class Locker(object):
         """
         self._connection = redis_connection
 
-    async def lock(self, key: str = None, duration: int = 10) -> Optional[Lock]:
+    @staticmethod
+    def create_unique_identifier(*args):
+        return "/".join(args).encode().hex()
+
+    @staticmethod
+    def create_mutex_key(identifier: str):
+        return f"{identifier}_mutex"
+
+    async def lock(self, key: str = None, duration: int = 10, force: bool = False) -> Optional[Lock]:
         """"""
         lock = Lock(lock_key=key, lock_duration=duration)
         async with self._connection as conn:
@@ -65,7 +74,7 @@ class Locker(object):
                 key=lock.redis_key,
                 value=lock.identifier,
                 expire=lock.duration,
-                exist=conn.SET_IF_NOT_EXIST
+                exist=conn.SET_IF_NOT_EXIST if not force else None
             )
             if not lock_result:
                 raise LockException("Cannot to set lock")
@@ -85,3 +94,48 @@ class Locker(object):
             if not lock_result:
                 raise LockException("Redis key is not exists")
         return lock
+
+    async def master_use_lock(
+            self,
+            lock_key: str,
+            max_expire_lock_time: int = 5,
+            duration: int = None,
+    ) -> Optional[Lock]:
+        """"""
+        async with self._connection as conn:
+            value, ttl = await asyncio.gather(
+                *[
+                    conn.get(lock_key),
+                    conn.ttl(lock_key)
+                ]
+            )
+
+            print(f"Current lock info:\tkey: `{lock_key}`\t|value: `{value}`\t|ttl: `{ttl}`")
+            if not value:
+                # ttl == -2 | True
+                return (
+                    await self.lock(
+                        key=lock_key,
+                        duration=duration,
+                        force=True
+                    )
+                )
+            if ttl == -1:
+                raise LockException(
+                    f"Expire for key `{lock_key}` is not set."
+                )
+            elif ttl <= max_expire_lock_time:
+                await conn.delete(
+                    lock_key
+                )
+                return (
+                    await self.lock(
+                        key=lock_key,
+                        duration=duration,
+                        force=True
+                    )
+                )
+            else:
+                raise LockException(
+                    f"Can't get mutex. ttl: `{ttl}`\tmax_expire: `{max_expire_lock_time}`."
+                )
