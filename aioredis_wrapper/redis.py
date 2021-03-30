@@ -43,3 +43,4 @@ class RedisConnection(object):
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         self._redis.close()
+        return await self._redis.wait_closed()
