@@ -2,7 +2,7 @@
 
 from typing import Optional
 
-from aioredis import create_redis
+from aioredis import create_redis, create_redis_pool
 
 
 class RedisConnection(object):
@@ -32,7 +32,7 @@ class RedisConnection(object):
         return self._host, self._port, self._db
 
     async def __aenter__(self):
-        self._redis = await create_redis(
+        self._redis = await create_redis_pool(
             (self._host, self._port),
             db=self._db,
             password=self._password,
