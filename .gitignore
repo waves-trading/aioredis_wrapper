@@ -4,4 +4,4 @@ venv*
 build
 dist
 *.egg-info*
-test.py
+test*.py
