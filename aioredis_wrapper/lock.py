@@ -97,15 +97,15 @@ class Locker(object):
         )
         async with self._connection as conn:
             lock_result = await conn.set(
-                key=lock.redis_key,
+                name=lock.redis_key,
                 value="|".join([lock.identifier, str(int(lock.priority_mode))]),
-                expire=lock.duration,
-                exist=conn.SET_IF_NOT_EXIST if not force else None
+                ex=lock.duration,
+                nx=not force
             )
             print(f"LOCK RESULT {key}: {lock_result}")
             if not lock_result:
                 raise LockException("Cannot to set lock")
-            expire_result = await conn.expire(lock.redis_key, duration)
+            expire_result = await conn.expire(name=lock.redis_key, time=duration)
             print(f"EXPIRE RESULT {key}: {expire_result}")
         return lock
 
@@ -142,7 +142,7 @@ class Locker(object):
             redis_lock_value, priority = redis_lock_value.split("|")
             if not redis_lock_value == lock.identifier:
                 raise LockException("Resource is locked with another identifier")
-            lock_result = await conn.expire(key=lock.redis_key, timeout=lock.duration)
+            lock_result = await conn.expire(name=lock.redis_key, time=lock.duration)
             if not lock_result:
                 raise LockException("Redis key is not exists")
         return lock
@@ -159,7 +159,7 @@ class Locker(object):
                 return lock
             if not redis_lock_value == lock.identifier and not force:
                 raise ReleaseLockException("Resource is locked with another identifier")
-            release_result = await conn.delete(key=lock.redis_key)
+            release_result = await conn.delete(lock.redis_key)
             if not release_result:
                 raise ReleaseLockException("Redis key is not exists")
             return lock

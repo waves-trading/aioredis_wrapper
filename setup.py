@@ -13,7 +13,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[
-        'aioredis',
+        'aioredis==2.0.0',
     ],
     python_requires='>=3.5',
 )
