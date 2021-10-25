@@ -65,7 +65,7 @@ class Lock(object):
         self._priority_mode = priority_mode
 
     def __str__(self):
-        return f"{self.redis_key}:{self.identifier}\t:{self.priority_mode}for {self.duration} seconds"
+        return f"{self.redis_key}:{self.identifier}\t:{self.priority_mode} for {self.duration} seconds"
 
 
 class Locker(object):
@@ -97,14 +97,16 @@ class Locker(object):
         )
         async with self._connection as conn:
             lock_result = await conn.set(
-                key=lock.redis_key,
+                name=lock.redis_key,
                 value="|".join([lock.identifier, str(int(lock.priority_mode))]),
-                expire=lock.duration,
-                exist=conn.SET_IF_NOT_EXIST if not force else None
+                ex=lock.duration,
+                nx=not force
             )
+            # print(f"LOCK RESULT {key}: {lock_result}")
             if not lock_result:
                 raise LockException("Cannot to set lock")
-            await conn.expire(lock.redis_key, duration)
+            expire_result = await conn.expire(name=lock.redis_key, time=duration)
+            # print(f"EXPIRE RESULT {key}: {expire_result}")
         return lock
 
     async def get_current_lock(self, lock_key: str = None) -> Optional[Lock]:
@@ -140,7 +142,7 @@ class Locker(object):
             redis_lock_value, priority = redis_lock_value.split("|")
             if not redis_lock_value == lock.identifier:
                 raise LockException("Resource is locked with another identifier")
-            lock_result = await conn.expire(key=lock.redis_key, timeout=lock.duration)
+            lock_result = await conn.expire(name=lock.redis_key, time=lock.duration)
             if not lock_result:
                 raise LockException("Redis key is not exists")
         return lock
@@ -157,7 +159,7 @@ class Locker(object):
                 return lock
             if not redis_lock_value == lock.identifier and not force:
                 raise ReleaseLockException("Resource is locked with another identifier")
-            release_result = await conn.delete(key=lock.redis_key)
+            release_result = await conn.delete(lock.redis_key)
             if not release_result:
                 raise ReleaseLockException("Redis key is not exists")
             return lock
@@ -170,6 +172,7 @@ class Locker(object):
             duration: int = None,
     ) -> Optional[Lock]:
         """"""
+        # print(f"Start master lock: {lock_key} | {max_expire_lock_time} | {duration}")
         async with self._connection as conn:
             lock_data, ttl = await asyncio.gather(
                 *[
@@ -177,33 +180,33 @@ class Locker(object):
                     conn.ttl(lock_key)
                 ]
             )
+            # print(f"IN REDIS {lock_key}: {lock_data} | {ttl}")
 
             if not lock_data:
                 # ttl == -2 | True
-                return (
-                    await self.lock(
+                # print(f"NO LOCK DATA IN REDIS FOR KEY: {lock_key}")
+                result = await self.lock(
                         key=lock_key,
                         duration=duration,
                         force=True
                     )
-                )
+                # print(f"Result: {result}")
+                return result
             value, priority = lock_data.split("|")
             print(f"Current lock info:\tkey: `{lock_key}`\t|value: `{value}`\t|ttl: `{ttl}`\t|pr: `{priority}`")
             if ttl == -1:
+                # print(f"NO EXPIRE for {lock_key}")
                 raise LockException(
                     f"Expire for key `{lock_key}` is not set."
                 )
             elif ttl <= max_expire_lock_time:
-                # await conn.delete(
-                #     lock_key
-                # )
-                return (
-                    await self.lock(
+                result = await self.lock(
                         key=lock_key,
                         duration=duration,
                         force=True
-                    )
                 )
+                # print(f"RESULT: {result}")
+                return result
             else:
                 raise LockException(
                     f"Can't get mutex. ttl: `{ttl}`\tmax_expire: `{max_expire_lock_time}`."

@@ -2,7 +2,7 @@ import setuptools
 
 setuptools.setup(
     name="aioredis_wrapper",
-    version="1.1.0",
+    version="1.5.1",
     author="Alex Shitik",
     author_email="salexs95@yandex.ru",
     description="Wrapper for aioredis library",
@@ -13,7 +13,7 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     install_requires=[
-        'aioredis==1.3.1',
+        'aioredis==2.0.0',
     ],
     python_requires='>=3.5',
 )
