@@ -102,11 +102,11 @@ class Locker(object):
                 ex=lock.duration,
                 nx=not force
             )
-            print(f"LOCK RESULT {key}: {lock_result}")
+            # print(f"LOCK RESULT {key}: {lock_result}")
             if not lock_result:
                 raise LockException("Cannot to set lock")
             expire_result = await conn.expire(name=lock.redis_key, time=duration)
-            print(f"EXPIRE RESULT {key}: {expire_result}")
+            # print(f"EXPIRE RESULT {key}: {expire_result}")
         return lock
 
     async def get_current_lock(self, lock_key: str = None) -> Optional[Lock]:
@@ -172,7 +172,7 @@ class Locker(object):
             duration: int = None,
     ) -> Optional[Lock]:
         """"""
-        print(f"Start master lock: {lock_key} | {max_expire_lock_time} | {duration}")
+        # print(f"Start master lock: {lock_key} | {max_expire_lock_time} | {duration}")
         async with self._connection as conn:
             lock_data, ttl = await asyncio.gather(
                 *[
@@ -180,22 +180,22 @@ class Locker(object):
                     conn.ttl(lock_key)
                 ]
             )
-            print(f"IN REDIS {lock_key}: {lock_data} | {ttl}")
+            # print(f"IN REDIS {lock_key}: {lock_data} | {ttl}")
 
             if not lock_data:
                 # ttl == -2 | True
-                print(f"NO LOCK DATA IN REDIS FOR KEY: {lock_key}")
+                # print(f"NO LOCK DATA IN REDIS FOR KEY: {lock_key}")
                 result = await self.lock(
                         key=lock_key,
                         duration=duration,
                         force=True
                     )
-                print(f"Result: {result}")
+                # print(f"Result: {result}")
                 return result
             value, priority = lock_data.split("|")
             print(f"Current lock info:\tkey: `{lock_key}`\t|value: `{value}`\t|ttl: `{ttl}`\t|pr: `{priority}`")
             if ttl == -1:
-                print(f"NO EXPIRE for {lock_key}")
+                # print(f"NO EXPIRE for {lock_key}")
                 raise LockException(
                     f"Expire for key `{lock_key}` is not set."
                 )
@@ -205,7 +205,7 @@ class Locker(object):
                         duration=duration,
                         force=True
                 )
-                print(f"RESULT: {result}")
+                # print(f"RESULT: {result}")
                 return result
             else:
                 raise LockException(
