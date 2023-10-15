@@ -2,7 +2,6 @@
 
 from typing import Optional
 
-# from aioredis import create_redis, create_redis_pool
 from aioredis import Redis
 
 
@@ -19,6 +18,7 @@ class RedisConnection(object):
             password: Optional[str] = None,
             db: int = 0,
             timeout: int = 2,
+            unix_socket_path: str = None,
             **__
     ) -> None:
         self._host = host
@@ -34,7 +34,8 @@ class RedisConnection(object):
             socket_connect_timeout=self._timeout,
             socket_timeout=self._timeout,
             decode_responses=True,
-            encoding="utf-8"
+            encoding="utf-8",
+            unix_socket_path=unix_socket_path
         )
 
     @property
@@ -43,15 +44,6 @@ class RedisConnection(object):
 
     async def __aenter__(self):
         return await self._redis.initialize()
-        # self._redis = await create_redis_pool(
-        #     (self._host, self._port),
-        #     db=self._db,
-        #     password=self._password,
-        #     encoding="utf-8",
-        #     timeout=self._timeout
-        # )
-        # return self._redis
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         return await self._redis.close()
-        # return await self._redis.wait_closed()
