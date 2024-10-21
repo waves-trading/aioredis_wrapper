@@ -2,6 +2,7 @@
 """
 
 __all__ = [
+    "Redis",
     "RedisConnection",
     "Locker",
     "Lock",
@@ -9,7 +10,7 @@ __all__ = [
 
 ]
 
-from .redis import RedisConnection
+from .redis import Redis, RedisConnection
 from .lock import (
     Locker,
     Lock,
