@@ -7,6 +7,7 @@ __all__ = [
     "Locker",
     "Lock",
     "LockException",
+    "RedisSettings"
 
 ]
 
@@ -16,3 +17,4 @@ from .lock import (
     Lock,
     LockException
 )
+from .settings import RedisSettings
