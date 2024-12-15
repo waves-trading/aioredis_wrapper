@@ -4,6 +4,7 @@ import hashlib
 from typing import Optional
 from uuid import uuid4
 from aioredis import Redis
+from .settings import RedisSettings
 
 
 # from .redis import RedisConnection
@@ -80,12 +81,15 @@ class Locker(object):
 
     def __init__(
             self,
-            redis_connection: Redis
+            settings: RedisSettings
+            # redis_connection: Redis
     ) -> None:
         """
         :param redis_connection: async connector to redis
         """
-        self._connection = redis_connection
+        self._connection = Redis(
+            **settings.model_dump()
+        )
 
     async def __aenter__(self):
         await self._connection.__aenter__()
