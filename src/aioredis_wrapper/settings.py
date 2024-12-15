@@ -10,3 +10,5 @@ class RedisSettings(BaseModel):
     socket_timeout: int = 2
     unix_socket_path: Optional[str] = None
     decode_responses: bool = True
+    username: Optional[str] = None
+    encoding: str = "utf-8",
