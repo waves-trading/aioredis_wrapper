@@ -11,4 +11,4 @@ class RedisSettings(BaseModel):
     unix_socket_path: Optional[str] = None
     decode_responses: bool = True
     username: Optional[str] = None
-    encoding: str = "utf-8",
+    encoding: str = "utf-8"
