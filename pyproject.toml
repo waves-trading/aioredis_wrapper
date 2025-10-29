@@ -7,7 +7,7 @@ name = "aioredis-wrapper"
 description = "Redis Locker"
 readme = "README.md"
 license = { file = "LICENSE" }
-version = "2.0.1"
+version = "2.1.0"
 authors = [
     { name = "Alex Shitik", email = "salexs95@yandex.ru" },
 ]
@@ -20,7 +20,7 @@ classifiers = [
 ]
 dependencies = [
     "pydantic",
-    'aioredis==2.0.0'
+    'redis'
 ]
 
 [tool.setuptools.packages.find]

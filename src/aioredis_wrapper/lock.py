@@ -3,7 +3,7 @@ import asyncio
 import hashlib
 from typing import Optional
 from uuid import uuid4
-from aioredis import Redis
+from redis.asyncio import Redis
 from .settings import RedisSettings
 
 
